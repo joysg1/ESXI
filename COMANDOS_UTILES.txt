@@ -1,3 +1,6 @@
+I. CONEXIÓN SSH Y VERIFICACIÓN DE ALMACENAMIENTO
+
+
 ++ PASO #1 HABILITAR SSH
 Desde vSphere Client: Host → Manage → Services → SSH → Start
 O desde DCUI (consola directa): F2 → Troubleshooting Options → Enable SSH
