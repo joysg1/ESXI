@@ -1,23 +1,23 @@
 I. CONEXIÓN SSH Y VERIFICACIÓN DE ALMACENAMIENTO
 
 
-++ PASO #1 HABILITAR SSH
+++ PASO #1. HABILITAR SSH
 Desde vSphere Client: Host → Manage → Services → SSH → Start
 O desde DCUI (consola directa): F2 → Troubleshooting Options → Enable SSH
 
 
-++ PASO #2 CONECTAR POR SSH
+++ PASO #2. CONECTAR POR SSH
 ssh root@ip-del-esxi
 o usar putty
 
 
-++ PASO #3 VERIFICAR EL ALMACENAMIENTO
+++ PASO #3. VERIFICAR EL ALMACENAMIENTO
 esxcli storage core adapter rescan --all
 esxcli storage vmfs snapshot list
 vdf -h
 
 
-++ PASO #4 NAVEGACIÓN BÁSICA
+++ PASO #4. NAVEGACIÓN BÁSICA
 # Ver datastores montados
 ls -la /vmfs/volumes/
 
@@ -28,7 +28,7 @@ cd /vmfs/volumes/nombre-datastore
 ls -la *.vmx
 
 
-++ PASO #5 VERIFICAR VM QUE NO APARECE
+++ PASO #5. VERIFICAR VM QUE NO APARECE
 # Buscar archivos .vmx en todos los datastores
 find /vmfs/volumes -name "*.vmx" -type f
 
@@ -37,3 +37,36 @@ vim-cmd solo/registervm /ruta/completa/al/archivo.vmx
 
 # Verificar VMs registradas
 vim-cmd vmsvc/getallvms
+
+
+II. EXPANDIR DATASTORE
+
+++ PASO #1. Ver estado actual
+echo "=== Estado Actual ==="
+vdf -h
+fdisk -l
+
+
+++ PASO #2. Rescanear por si acaso
+echo "=== Rescaneando ==="
+esxcli storage core adapter rescan --all
+
+
+++ PASO #3. Identificar disco principal
+echo "=== Discos Disponibles ==="
+ls -la /vmfs/devices/disks/ | grep -v ":"
+
+
+++ PASO #4. Ver particiones actuales
+echo "=== Particiones Actuales ==="
+partedUtil getptbl /vmfs/devices/disks/mpx.vmhba0:C0:T0:L0
+
+
+++ PASO #5. Expandir automáticamente (método más seguro)
+echo "=== Expandiendo Datastore ==="
+vmkfstools -X max /vmfs/volumes/datastore1
+
+
+++ PASO #6. Verificar resultado
+echo "=== Verificando Resultado ==="
+vdf -h
