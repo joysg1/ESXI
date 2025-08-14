@@ -70,3 +70,6 @@ vmkfstools -X max /vmfs/volumes/datastore1
 ++ PASO #6. Verificar resultado
 echo "=== Verificando Resultado ==="
 vdf -h
+
+++ INFORMACIÓN ADICIONAL (Migración de máquinas virtuales): 
+https://www.nakivo.com/es/blog/vmware-migration-to-another-host/
