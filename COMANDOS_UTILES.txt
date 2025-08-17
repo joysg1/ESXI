@@ -73,3 +73,10 @@ vdf -h
 
 ++ INFORMACIÓN ADICIONAL (Migración de máquinas virtuales): 
 https://www.nakivo.com/es/blog/vmware-migration-to-another-host/
+
+
+III. MEJORES PRÁCTICAS AL MIGRAR UN ESXI
+
+1. COPIAR LAS MAQUINAS VIRTUALES DEL DATASTORE ANTIGUO AL NUEVO
+
+2. REGISTRAR LA MÁQUINA VIRTUAL EN EL ESXI NUEVO
