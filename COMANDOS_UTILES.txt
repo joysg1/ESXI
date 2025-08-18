@@ -82,3 +82,15 @@ III. MEJORES PRÁCTICAS AL MIGRAR UN ESXI
 2. COPIAR LAS MAQUINAS VIRTUALES DEL DATASTORE ANTIGUO AL NUEVO
 
 3. REGISTRAR LA MÁQUINA VIRTUAL EN EL ESXI NUEVO
+
+
+IV. EXTENDER PERIODO DE PRUEBA
+
+1. INGRESAR VIA SSH AL HOST ESXI
+
+2. EJECUTAR LOS SIGUIENTES COMANDOS:
+
+++ mv /etc/vmware/license.cfg etc/vmware/license.cfg.old
+++ cp /etc/vmware/.#license.cfg /etc/vmware/license.cfg
+++ /etc/init.d/vpxa restart
+
