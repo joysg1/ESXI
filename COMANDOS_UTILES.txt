@@ -94,3 +94,14 @@ IV. EXTENDER PERIODO DE PRUEBA
 ++ cp /etc/vmware/.#license.cfg /etc/vmware/license.cfg
 ++ /etc/init.d/vpxa restart
 
+
+V. VER INFORMACION DEL HOST
+
+++ esxcli system version get
+++ esxcli system hostname get
+
+
+VI. ACTIVAR O DESACTIVAR EL MODO DE MANTENIMIENTO
+
+++ esxcli system maintenanceMode set --enable true/false
+
