@@ -1,1 +1,2 @@
-
+++ Transformar máquina virtual (archivo .vmx) a ova
+--- ovftool <archivo.vmx> <archivo.ova>
