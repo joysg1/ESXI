@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Comandos VMware ESXi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Fira Code', monospace;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(30, 30, 46, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 112, 210, 0.3);
+            overflow: hidden;
+            border: 1px solid #0070d2;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0070d2 0%, #0058a6 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        .vmware-icon {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            color: #a8e6cf;
+        }
+        
+        nav {
+            background: rgba(0, 112, 210, 0.95);
+            padding: 18px 0;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #0058a6;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 35px;
+            gap: 35px;
+        }
+        
+        .sidebar {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(42, 42, 62, 0.8);
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 112, 210, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .content {
+            flex: 3;
+            min-width: 320px;
+        }
+        
+        h2 {
+            color: #0070d2;
+            border-bottom: 3px solid #0070d2;
+            padding-bottom: 15px;
+            margin: 35px 0 25px;
+            font-size: 2rem;
+        }
+        
+        h3 {
+            color: #4fc3f7;
+            margin: 28px 0 18px;
+            font-size: 1.4rem;
+        }
+        
+        .category {
+            margin-bottom: 45px;
+            background: rgba(42, 42, 62, 0.6);
+            padding: 28px;
+            border-radius: 12px;
+            border-left: 6px solid #0070d2;
+            transition: transform 0.3s ease;
+        }
+        
+        .category:hover {
+            transform: translateX(5px);
+        }
+        
+        .command {
+            background: linear-gradient(135deg, rgba(42, 42, 62, 0.8) 0%, rgba(30, 30, 46, 0.8) 100%);
+            padding: 20px;
+            margin: 18px 0;
+            border-radius: 10px;
+            border-left: 5px solid #4fc3f7;
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .command:hover {
+            border-color: #4fc3f7;
+            box-shadow: 0 6px 20px rgba(79, 195, 247, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .command code {
+            background: rgba(0, 112, 210, 0.1);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            color: #4fc3f7;
+            font-weight: bold;
+            border: 1px solid rgba(0, 112, 210, 0.2);
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .command-desc {
+            margin-top: 12px;
+            color: #a8e6cf;
+            line-height: 1.6;
+        }
+        
+        .sub-command {
+            margin-left: 28px;
+            background: rgba(30, 30, 46, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 8px;
+            border-left: 3px solid #a8e6cf;
+        }
+        
+        .sub-command code {
+            color: #a8e6cf;
+            background: rgba(168, 230, 207, 0.1);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(42, 42, 62, 0.95);
+            color: #a8e6cf;
+            margin-top: 50px;
+            border-top: 1px solid rgba(0, 112, 210, 0.3);
+        }
+        
+        .search-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        #search {
+            width: 100%;
+            max-width: 550px;
+            padding: 18px 25px;
+            background: rgba(30, 30, 46, 0.8);
+            border: 2px solid rgba(0, 112, 210, 0.5);
+            border-radius: 30px;
+            font-size: 16px;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        #search:focus {
+            outline: none;
+            border-color: #0070d2;
+            box-shadow: 0 0 25px rgba(0, 112, 210, 0.5);
+        }
+        
+        #search::placeholder {
+            color: #888;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #4fc3f7, #0070d2);
+            color: #000;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+        
+        .vmware-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #0070d2, #0058a6);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+
+        .ssh-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+
+        .storage-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+
+        .maintenance-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+        
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                margin-right: 0;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        /* Efectos especiales */
+        .terminal-effect {
+            position: relative;
+        }
+        
+        .terminal-effect::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: #0070d2;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 14px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 30, 46, 0.8);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #0070d2, #0058a6);
+            border-radius: 8px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #0058a6, #004080);
+        }
+        
+        /* Índice mejorado */
+        .index-item {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            background: rgba(42, 42, 62, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid #0070d2;
+            transition: all 0.3s ease;
+        }
+        
+        .index-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 112, 210, 0.2);
+        }
+        
+        .index-link {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+        }
+        
+        .index-link:hover {
+            color: #0070d2;
+        }
+
+        /* Notas y advertencias */
+        .note {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid #f59e0b;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #fcd34d;
+        }
+
+        .warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #fca5a5;
+        }
+
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #93c5fd;
+        }
+
+        /* Secciones numeradas */
+        .section-number {
+            display: inline-block;
+            background: #0070d2;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #4fc3f7;
+            color: #000;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VMware ESXi <span class="vmware-icon">⚙️</span> Commands</h1>
+            <p class="subtitle">Manual completo de administración y mantenimiento de ESXi</p>
+        </header>
+        
+        <nav>
+            <div class="nav-container">
+                <a href="#conexion" class="nav-item">Conexión SSH</a>
+                <a href="#almacenamiento" class="nav-item">Almacenamiento</a>
+                <a href="#expansion" class="nav-item">Expansión</a>
+                <a href="#migracion" class="nav-item">Migración</a>
+                <a href="#licencias" class="nav-item">Licencias</a>
+                <a href="#sistema" class="nav-item">Sistema</a>
+            </div>
+        </nav>
+        
+        <div class="search-container">
+            <input type="text" id="search" placeholder="root@esxi:~# Buscar comandos de ESXi...">
+        </div>
+        
+        <main>
+            <div class="sidebar">
+                <h2>Índice de Secciones</h2>
+                <div id="index-list">
+                    <!-- El índice se generará automáticamente con JavaScript -->
+                </div>
+            </div>
+            
+            <div class="content" id="content">
+                <!-- Conexión SSH -->
+                <div class="category" id="conexion">
+                    <h2><span class="section-number">I</span> Conexión SSH y Verificación de Almacenamiento <span class="ssh-badge">SSH</span></h2>
+                    
+                    <h3><span class="step-number">1</span> Habilitar SSH</h3>
+                    <div class="command">
+                        <code>Desde vSphere Client: Host → Manage → Services → SSH → Start</code>
+                        <div class="command-desc">Método gráfico desde el cliente vSphere</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>Desde DCUI (consola directa): F2 → Troubleshooting Options → Enable SSH</code>
+                        <div class="command-desc">Método desde la consola física del servidor</div>
+                    </div>
+
+                    <h3><span class="step-number">2</span> Conectar por SSH</h3>
+                    <div class="command">
+                        <code>ssh root@ip-del-esxi</code>
+                        <div class="command-desc">Conexión directa desde terminal Linux/Mac</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>Usar PuTTY (Windows)</code>
+                        <div class="command-desc">Cliente SSH para sistemas Windows</div>
+                    </div>
+
+                    <div class="note">
+                        🔐 <strong>Seguridad:</strong> Recuerda deshabilitar SSH después de su uso en entornos de producción.
+                    </div>
+
+                    <h3><span class="step-number">3</span> Verificar el Almacenamiento</h3>
+                    <div class="command">
+                        <code>esxcli storage core adapter rescan --all</code>
+                        <div class="command-desc">Rescanear todos los adaptadores de almacenamiento</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>esxcli storage vmfs snapshot list</code>
+                        <div class="command-desc">Listar snapshots de VMFS</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vdf -h</code>
+                        <div class="command-desc">Ver uso de disco en formato legible</div>
+                    </div>
+
+                    <h3><span class="step-number">4</span> Navegación Básica</h3>
+                    <div class="command">
+                        <code>ls -la /vmfs/volumes/</code>
+                        <div class="command-desc">Ver datastores montados en el sistema</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>cd /vmfs/volumes/nombre-datastore</code>
+                        <div class="command-desc">Navegar a un datastore específico</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>ls -la *.vmx</code>
+                        <div class="command-desc">Ver archivos de configuración de VMs en el datastore</div>
+                    </div>
+
+                    <h3><span class="step-number">5</span> Verificar VM que No Aparece</h3>
+                    <div class="command">
+                        <code>find /vmfs/volumes -name "*.vmx" -type f</code>
+                        <div class="command-desc">Buscar archivos .vmx en todos los datastores</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vim-cmd solo/registervm /ruta/completa/al/archivo.vmx</code>
+                        <div class="command-desc">Re-registrar VM encontrada en el inventario</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vim-cmd vmsvc/getallvms</code>
+                        <div class="command-desc">Verificar VMs registradas en el host</div>
+                    </div>
+
+                    <div class="info">
+                        💡 <strong>Tip:</strong> Usa <code>vim-cmd vmsvc/getallvms</code> para listar todas las VMs registradas con sus IDs.
+                    </div>
+                </div>
+
+                <!-- Expansión de Datastore -->
+                <div class="category" id="expansion">
+                    <h2><span class="section-number">II</span> Expandir Datastore <span class="storage-badge">STORAGE</span></h2>
+                    
+                    <h3><span class="step-number">1</span> Ver Estado Actual</h3>
+                    <div class="command">
+                        <code>echo "=== Estado Actual ==="</code>
+                        <div class="command-desc">Encabezado para organización</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vdf -h</code>
+                        <div class="command-desc">Ver uso de disco en formato humano</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>fdisk -l</code>
+                        <div class="command-desc">Listar particiones y discos disponibles</div>
+                    </div>
+
+                    <h3><span class="step-number">2</span> Rescanear Dispositivos</h3>
+                    <div class="command">
+                        <code>echo "=== Rescaneando ==="</code>
+                        <div class="command-desc">Encabezado informativo</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>esxcli storage core adapter rescan --all</code>
+                        <div class="command-desc">Forzar rescan de todos los adaptadores de almacenamiento</div>
+                    </div>
+
+                    <h3><span class="step-number">3</span> Identificar Disco Principal</h3>
+                    <div class="command">
+                        <code>echo "=== Discos Disponibles ==="</code>
+                        <div class="command-desc">Encabezado para claridad</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>ls -la /vmfs/devices/disks/ | grep -v ":"</code>
+                        <div class="command-desc">Listar discos disponibles (filtrando enlaces)</div>
+                    </div>
+
+                    <h3><span class="step-number">4</span> Ver Particiones Actuales</h3>
+                    <div class="command">
+                        <code>echo "=== Particiones Actuales ==="</code>
+                        <div class="command-desc">Encabezado organizativo</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>partedUtil getptbl /vmfs/devices/disks/mpx.vmhba0:C0:T0:L0</code>
+                        <div class="command-desc">Ver tabla de particiones del disco principal</div>
+                    </div>
+
+                    <div class="note">
+                        📝 <strong>Nota:</strong> Reemplaza <code>mpx.vmhba0:C0:T0:L0</code> con la ruta correcta de tu disco.
+                    </div>
+
+                    <h3><span class="step-number">5</span> Expandir Automáticamente</h3>
+                    <div class="command">
+                        <code>echo "=== Expandiendo Datastore ==="</code>
+                        <div class="command-desc">Encabezado del proceso de expansión</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vmkfstools -X max /vmfs/volumes/datastore1</code>
+                        <div class="command-desc">Expandir datastore al máximo tamaño disponible (método más seguro)</div>
+                    </div>
+
+                    <div class="warning">
+                        ⚠️ <strong>Precaución:</strong> Asegúrate de tener un backup antes de expandir el datastore.
+                    </div>
+
+                    <h3><span class="step-number">6</span> Verificar Resultado</h3>
+                    <div class="command">
+                        <code>echo "=== Verificando Resultado ==="</code>
+                        <div class="command-desc">Encabezado de verificación</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vdf -h</code>
+                        <div class="command-desc">Verificar el nuevo tamaño del datastore</div>
+                    </div>
+
+                    <div class="info">
+                        🔗 <strong>Recurso adicional:</strong> 
+                        <a href="https://www.nakivo.com/es/blog/vmware-migration-to-another-host/" target="_blank" style="color: #93c5fd;">
+                            Guía completa de migración de VMware
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Migración ESXi -->
+                <div class="category" id="migracion">
+                    <h2><span class="section-number">III</span> Mejores Prácticas al Migrar un ESXi <span class="vmware-badge">MIGRATION</span></h2>
+                    
+                    <h3><span class="step-number">1</span> Configuración del Nuevo Host</h3>
+                    <div class="command">
+                        <code>Al instalar el nuevo ESXi poner la misma IP y credenciales</code>
+                        <div class="command-desc">Mantener consistencia en la configuración de red</div>
+                    </div>
+
+                    <div class="note">
+                        🌐 <strong>Red:</strong> Usar la misma IP facilita la migración y evita problemas de DNS.
+                    </div>
+
+                    <h3><span class="step-number">2</span> Copia de Máquinas Virtuales</h3>
+                    <div class="command">
+                        <code>Copiar las máquinas virtuales del datastore antiguo al nuevo</code>
+                        <div class="command-desc">Transferir los archivos de las VMs entre datastores</div>
+                    </div>
+
+                    <div class="sub-command">
+                        <code>Métodos de copia:</code>
+                        <div class="command-desc">
+                            - SCP entre hosts<br>
+                            - vSphere Client File Copy<br>
+                            - Datastore Browser<br>
+                            - Comandos ESXi
+                        </div>
+                    </div>
+
+                    <h3><span class="step-number">3</span> Registro en Nuevo Host</h3>
+                    <div class="command">
+                        <code>Registrar la máquina virtual en el ESXi nuevo</code>
+                        <div class="command-desc">Agregar las VMs al inventario del nuevo host</div>
+                    </div>
+
+                    <div class="sub-command">
+                        <code>vim-cmd solo/registervm /vmfs/volumes/datastore1/vm-name/vm-name.vmx</code>
+                        <div class="command-desc">Comando para registrar VM manualmente</div>
+                    </div>
+
+                    <div class="info">
+                        ✅ <strong>Verificación:</strong> Después de la migración, verifica que todas las VMs arranquen correctamente.
+                    </div>
+                </div>
+
+                <!-- Licencias y Trial -->
+                <div class="category" id="licencias">
+                    <h2><span class="section-number">IV</span> Extender Periodo de Prueba <span class="vmware-badge">LICENSE</span></h2>
+                    
+                    <h3><span class="step-number">1</span> Acceso al Sistema</h3>
+                    <div class="command">
+                        <code>Ingresar via SSH al host ESXi</code>
+                        <div class="command-desc">Conectarse al servidor ESXi con credenciales de root</div>
+                    </div>
+
+                    <h3><span class="step-number">2</span> Comandos de Extensión</h3>
+                    <div class="command">
+                        <code>mv /etc/vmware/license.cfg /etc/vmware/license.cfg.old</code>
+                        <div class="command-desc">Renombrar archivo de licencia actual (backup)</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>cp /etc/vmware/.#license.cfg /etc/vmware/license.cfg</code>
+                        <div class="command-desc">Copiar archivo de licencia de evaluación</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>/etc/init.d/vpxa restart</code>
+                        <div class="command-desc">Reiniciar servicio de vCenter Agent</div>
+                    </div>
+
+                    <div class="warning">
+                        ⚠️ <strong>Legal:</strong> Este procedimiento es solo para entornos de evaluación. Para producción, usa licencias válidas.
+                    </div>
+
+                    <div class="note">
+                        🔄 <strong>Reinicio:</strong> El reinicio de vpxa aplica los cambios de licencia inmediatamente.
+                    </div>
+                </div>
+
+                <!-- Información del Sistema -->
+                <div class="category" id="sistema">
+                    <h2><span class="section-number">V</span> Ver Información del Host <span class="vmware-badge">SYSTEM</span></h2>
+                    
+                    <div class="command">
+                        <code>esxcli system version get</code>
+                        <div class="command-desc">Mostrar versión del ESXi y build number</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>esxcli system hostname get</code>
+                        <div class="command-desc">Mostrar nombre del host y configuración de red</div>
+                    </div>
+
+                    <div class="info">
+                        📊 <strong>Información adicional:</strong> Usa <code>esxcli system</code> para ver todas las opciones disponibles del sistema.
+                    </div>
+
+                    <h2><span class="section-number">VI</span> Activar o Desactivar Modo de Mantenimiento <span class="maintenance-badge">MAINTENANCE</span></h2>
+                    
+                    <div class="command">
+                        <code>esxcli system maintenanceMode set --enable true</code>
+                        <div class="command-desc">Activar modo de mantenimiento</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>esxcli system maintenanceMode set --enable false</code>
+                        <div class="command-desc">Desactivar modo de mantenimiento</div>
+                    </div>
+
+                    <div class="warning">
+                        🛑 <strong>Modo Mantenimiento:</strong> En este modo, las VMs no pueden ser encendidas y el host no acepta nuevas migraciones.
+                    </div>
+
+                    <div class="note">
+                        📋 <strong>Verificación:</strong> Usa <code>esxcli system maintenanceMode get</code> para ver el estado actual.
+                    </div>
+                </div>
+
+                <!-- Comandos Adicionales Útiles -->
+                <div class="category" id="adicionales">
+                    <h2>Comandos Adicionales Útiles <span class="ssh-badge">UTILITIES</span></h2>
+                    
+                    <h3>Gestión de Servicios</h3>
+                    <div class="command">
+                        <code>/etc/init.d/SSH start|stop|restart</code>
+                        <div class="command-desc">Gestionar servicio SSH</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>services.sh restart</code>
+                        <div class="command-desc">Reiniciar todos los servicios</div>
+                    </div>
+
+                    <h3>Redes</h3>
+                    <div class="command">
+                        <code>esxcli network ip interface list</code>
+                        <div class="command-desc">Listar interfaces de red</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>esxcli network vm list</code>
+                        <div class="command-desc">Listar VMs con su configuración de red</div>
+                    </div>
+
+                    <h3>Hardware</h3>
+                    <div class="command">
+                        <code>esxcli hardware memory get</code>
+                        <div class="command-desc">Ver información de memoria RAM</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>esxcli hardware cpu list</code>
+                        <div class="command-desc">Listar información de CPUs</div>
+                    </div>
+
+                    <h3>VMs</h3>
+                    <div class="command">
+                        <code>vim-cmd vmsvc/power.on VMID</code>
+                        <div class="command-desc">Encender VM específica</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vim-cmd vmsvc/power.off VMID</code>
+                        <div class="command-desc">Apagar VM específica</div>
+                    </div>
+                    
+                    <div class="command">
+                        <code>vim-cmd vmsvc/get.summary VMID</code>
+                        <div class="command-desc">Ver resumen de VM específica</div>
+                    </div>
+
+                    <div class="info">
+                        🆔 <strong>VMID:</strong> Usa <code>vim-cmd vmsvc/getallvms</code> para obtener los IDs de las VMs.
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>VMware ESXi Commands Manual &copy; 2024 - Virtualization Administration</p>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #0070d2;">Powered by VMware ESXi</p>
+        </footer>
+    </div>
+
+    <script>
+        // Generar índice automáticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const categories = document.querySelectorAll('.category');
+            const indexList = document.getElementById('index-list');
+            
+            categories.forEach(category => {
+                const categoryId = category.id;
+                const categoryTitle = category.querySelector('h2').textContent;
+                
+                const listItem = document.createElement('div');
+                listItem.className = 'index-item';
+                
+                const link = document.createElement('a');
+                link.href = `#${categoryId}`;
+                
+                // Iconos diferentes para cada categoría
+                let icon = '⚙️';
+                if (categoryId === 'conexion') icon = '🔌';
+                else if (categoryId === 'expansion') icon = '💾';
+                else if (categoryId === 'migracion') icon = '🚚';
+                else if (categoryId === 'licencias') icon = '📜';
+                else if (categoryId === 'sistema') icon = '🖥️';
+                else if (categoryId === 'adicionales') icon = '🔧';
+                
+                link.textContent = `${icon} ${categoryTitle.replace('SSH', '').replace('STORAGE', '').replace('MIGRATION', '').replace('LICENSE', '').replace('SYSTEM', '').replace('MAINTENANCE', '').replace('UTILITIES', '').trim()}`;
+                link.className = 'index-link';
+                
+                listItem.appendChild(link);
+                indexList.appendChild(listItem);
+            });
+            
+            // Funcionalidad de búsqueda
+            const searchInput = document.getElementById('search');
+            const commands = document.querySelectorAll('.command');
+            const notes = document.querySelectorAll('.note, .warning, .info');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                commands.forEach(command => {
+                    const commandText = command.textContent.toLowerCase();
+                    const commandCode = command.querySelector('code');
+                    
+                    // Remover resaltado anterior
+                    if (commandCode) {
+                        commandCode.innerHTML = commandCode.textContent;
+                    }
+                    
+                    if (searchTerm === '') {
+                        command.style.display = 'block';
+                    } else if (commandText.includes(searchTerm)) {
+                        command.style.display = 'block';
+                        
+                        // Resaltar término de búsqueda
+                        if (commandCode) {
+                            const regex = new RegExp(searchTerm, 'gi');
+                            commandCode.innerHTML = commandCode.textContent.replace(regex, match => 
+                                `<span class="highlight">${match}</span>`
+                            );
+                        }
+                    } else {
+                        command.style.display = 'none';
+                    }
+                });
+
+                // Buscar en notas y advertencias
+                notes.forEach(note => {
+                    const noteText = note.textContent.toLowerCase();
+                    
+                    if (searchTerm === '') {
+                        note.style.display = 'block';
+                    } else if (noteText.includes(searchTerm)) {
+                        note.style.display = 'block';
+                    } else {
+                        note.style.display = 'none';
+                    }
+                });
+            });
+
+            // Efecto de terminal en la búsqueda
+            searchInput.placeholder = "root@esxi:~# Buscar comandos de ESXi...";
+        });
+
+        // Efecto de escritura en el título
+        document.addEventListener('DOMContentLoaded', function() {
+            const title = document.querySelector('h1');
+            title.classList.add('terminal-effect');
+        });
+    </script>
+</body>
+</html>
